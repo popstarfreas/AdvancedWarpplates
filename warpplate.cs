@@ -12,7 +12,7 @@ using System.Web;
 
 namespace PluginTemplate
 {
-    [APIVersion(1, 10)]
+    [APIVersion(1, 12)]
     public class WarpplatePlugin : TerrariaPlugin
     {
         public static List<Player> Players = new List<Player>();
