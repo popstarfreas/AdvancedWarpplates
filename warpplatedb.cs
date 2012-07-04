@@ -65,7 +65,7 @@ namespace PluginTemplate
         {
             try
             {
-                database.Query("UPDATE Warpplates SET WorldID=@0, UserIds=''", Main.worldID.ToString());
+                database.Query("UPDATE Warpplates SET WorldID=@0, UserIds='', Delay=4", Main.worldID.ToString());
                 ReloadAllWarpplates();
             }
             catch (Exception ex)
@@ -91,19 +91,12 @@ namespace PluginTemplate
                         string mergedids = reader.Get<string>("UserIds");
                         string name = reader.Get<string>("WarpplateName");
                         string warpdest = reader.Get<string>("WarpplateDestination");
-                        int Delay = 4;
-                        try
-                        {
-                            Delay = reader.Get<int>("Delay");
-                        }
-                        catch
-                        {
-                        }
+                        int Delay = reader.Get<int>("Delay");
 
                         string[] splitids = mergedids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
                         Warpplate r = new Warpplate(new Vector2(X1, Y1), new Rectangle(X1, Y1, width, height), name, warpdest, Protected != 0, Main.worldID.ToString());
-                        r.Delay = Delay;  // SO SILLY
+                        r.Delay = Delay;
 
                         try
                         {
@@ -177,6 +170,25 @@ namespace PluginTemplate
                 {
                     Warpplate.DisableBuild = state;
                     database.Query("UPDATE Warpplates SET Protected=@0 WHERE WarpplateName=@1 AND WorldID=@2", state ? 1 : 0, name, Main.worldID.ToString());
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+            }
+            return false;
+        }
+
+        public bool UpdateWarpplate(string name)
+        {
+            var wp = GetWarpplateByName(name);
+            if (wp != null)
+            {
+                try
+                {
+                    database.Query("UPDATE Warpplates SET width=@0, height=@1, Delay=@2 WHERE WarpplateName=@3 AND WorldID=@4", wp.Area.Width, wp.Area.Height, wp.Delay, name, Main.worldID.ToString());
 
                     return true;
                 }

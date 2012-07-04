@@ -24,7 +24,7 @@ namespace PluginTemplate
         }
         public override string Author
         {
-            get { return "Created by DarkunderdoG"; }
+            get { return "Created by DarkunderdoG, modified by 2.0"; }
         }
         public override string Description
         {
@@ -80,6 +80,9 @@ namespace PluginTemplate
             Commands.ChatCommands.Add(new Command("setwarpplate", warpallow, "wpallow"));
             Commands.ChatCommands.Add(new Command("setwarpplate", reloadwarp, "reloadwarp"));
             Commands.ChatCommands.Add(new Command("setwarpplate", setwarpplatedelay, "swpdl"));
+            Commands.ChatCommands.Add(new Command("setwarpplate", setwarpplatewidth, "swpw"));
+            Commands.ChatCommands.Add(new Command("setwarpplate", setwarpplateheight, "swph"));
+            Commands.ChatCommands.Add(new Command("setwarpplate", setwarpplatesize, "swps"));
         }
         
         public void OnGreetPlayer(int ply, HandledEventArgs e)
@@ -130,18 +133,15 @@ namespace PluginTemplate
                                 {
                                     player.warpplatetime = 0;
                                     player.warped = false;
-                                    player.TSPlayer.SendMessage("FALSe"); // DEBUG ONLY
                                 }
                                 else
                                 {
-                                    player.TSPlayer.SendMessage("y.."); // DEBUG ONLY
                                     if (player.warped)
                                         continue;
                                     var warpplateinfo = Warpplates.FindWarpplate(region);
                                     var warp = Warpplates.FindWarpplate(warpplateinfo.WarpDest);
                                     if (warp != null)
                                     {
-                                        player.TSPlayer.SendMessage("yes"); // DEBUG ONLY
                                         player.warpplatetime++;
                                         if ((warpplateinfo.Delay - player.warpplatetime) > 0)
                                             player.TSPlayer.SendMessage("You Will Be Warped To " + warpplateinfo.WarpDest + " in " + (warpplateinfo.Delay - player.warpplatetime) + " Seconds");
@@ -192,23 +192,136 @@ namespace PluginTemplate
 
         private static void setwarpplatedelay(CommandArgs args)
         {
-            if (args.Parameters.Count != 2)
-            {
-                args.Player.SendMessage("Invalid syntax! Proper syntax: /swpd <warpplate name> <delay in seconds>", Color.Red);
-                args.Player.SendMessage("Set -1 for immediate warp", Color.Red);
+            string region = "";
+            if (args.Parameters.Count == 2)
+                region = args.Parameters[0];
+            else if (args.Parameters.Count == 1)
+                region = Warpplates.InAreaWarpplateName(args.Player.TileX, args.Player.TileY);
+            else {
+                args.Player.SendMessage("Invalid syntax! Proper syntax: /swpd [<warpplate name>] <delay in seconds>", Color.Red);
+                args.Player.SendMessage("Set 0 for immediate warp", Color.Red);
                 return;
             }
-            Warpplate wp = Warpplates.FindWarpplate(args.Parameters[0]);
+            Warpplate wp = Warpplates.FindWarpplate(region);
             if (wp == null)
             {
                 args.Player.SendMessage("No such warpplate", Color.Red);
                 return;
             }
             int Delay;
-            if (Int32.TryParse(args.Parameters[1], out Delay))
+            if (Int32.TryParse(args.Parameters[args.Parameters.Count - 1], out Delay))
             {
-                wp.Delay = Delay;
-                args.Player.SendMessage(String.Format("Set delay of {0} to {1} seconds", wp.Name, wp.Delay), Color.Green);
+                wp.Delay = Delay + 1;
+                if (Warpplates.UpdateWarpplate(wp.Name))
+                    args.Player.SendMessage(String.Format("Set delay of {0} to {1} seconds", wp.Name, Delay), Color.Green);
+                else
+                    args.Player.SendMessage("Something went wrong", Color.Red);
+            }
+            else
+                args.Player.SendMessage("Bad number specified", Color.Red);
+        }
+
+        private static void setwarpplatewidth(CommandArgs args)
+        {
+            string region = "";
+            if (args.Parameters.Count == 2)
+                region = args.Parameters[0];
+            else if (args.Parameters.Count == 1)
+                region = Warpplates.InAreaWarpplateName(args.Player.TileX, args.Player.TileY);
+            else
+            {
+                args.Player.SendMessage("Invalid syntax! Proper syntax: /swpw [<warpplate name>] <width in blocks>", Color.Red);
+                return;
+            }
+            Warpplate wp = Warpplates.FindWarpplate(region);
+            if (wp == null)
+            {
+                args.Player.SendMessage("No such warpplate", Color.Red);
+                return;
+            }
+            int Width;
+            if (Int32.TryParse(args.Parameters[args.Parameters.Count - 1], out Width))
+            {
+                Rectangle r;
+                r = wp.Area;
+                r.Width = Width;
+                wp.Area = r;
+                if (Warpplates.UpdateWarpplate(wp.Name))
+                    args.Player.SendMessage(String.Format("Set width of {0} to {1} blocks", wp.Name, Width), Color.Green);
+                else
+                    args.Player.SendMessage("Something went wrong", Color.Red);
+            }
+            else
+                args.Player.SendMessage("Bad number specified", Color.Red);
+        }
+
+        private static void setwarpplateheight(CommandArgs args)
+        {
+            string region = "";
+            if (args.Parameters.Count == 2)
+                region = args.Parameters[0];
+            else if (args.Parameters.Count == 1)
+                region = Warpplates.InAreaWarpplateName(args.Player.TileX, args.Player.TileY);
+            else
+            {
+                args.Player.SendMessage("Invalid syntax! Proper syntax: /swph [<warpplate name>] <height in blocks>", Color.Red);
+                return;
+            }
+            Warpplate wp = Warpplates.FindWarpplate(region);
+            if (wp == null)
+            {
+                args.Player.SendMessage("No such warpplate", Color.Red);
+                return;
+            }
+            int Height;
+            if (Int32.TryParse(args.Parameters[args.Parameters.Count - 1], out Height))
+            {
+                Rectangle r;
+                r = wp.Area;
+                r.Height = Height;
+                wp.Area = r;
+                Warpplates.UpdateWarpplate(wp.Name);
+                if (Warpplates.UpdateWarpplate(wp.Name))
+                    args.Player.SendMessage(String.Format("Set height of {0} to {1} blocks", wp.Name, Height), Color.Green);
+                else
+                    args.Player.SendMessage("Something went wrong", Color.Red);
+            }
+            else
+                args.Player.SendMessage("Bad number specified", Color.Red);
+        }
+
+        private static void setwarpplatesize(CommandArgs args)
+        {
+            string region = "";
+            if (args.Parameters.Count == 3)
+                region = args.Parameters[0];
+            else if (args.Parameters.Count == 2)
+                region = Warpplates.InAreaWarpplateName(args.Player.TileX, args.Player.TileY);
+            else
+            {
+                args.Player.SendMessage("Invalid syntax! Proper syntax: /swps [<warpplate name>] <width> <height>", Color.Red);
+                return;
+            }
+            Warpplate wp = Warpplates.FindWarpplate(region);
+            if (wp == null)
+            {
+                args.Player.SendMessage("No such warpplate", Color.Red);
+                return;
+            }
+            int Width, Height;
+            if (Int32.TryParse(args.Parameters[args.Parameters.Count - 2], out Width) &&
+                Int32.TryParse(args.Parameters[args.Parameters.Count - 1], out Height))
+            {
+                Rectangle r;
+                r = wp.Area;
+                r.Width = Width;
+                r.Height = Height;
+                wp.Area = r;
+                Warpplates.UpdateWarpplate(wp.Name);
+                if (Warpplates.UpdateWarpplate(wp.Name))
+                    args.Player.SendMessage(String.Format("Set size of {0} to {1}x{2}", wp.Name, Width, Height), Color.Green);
+                else
+                    args.Player.SendMessage("Something went wrong", Color.Red);
             }
             else
                 args.Player.SendMessage("Bad number specified", Color.Red);
@@ -304,8 +417,9 @@ namespace PluginTemplate
                 args.Player.SendMessage("No Such Warpplate", Color.Red);
             else
             {
-                args.Player.SendMessage("Name: " + warpplateinfo.Name + " Destination: " + warpplateinfo.WarpDest, Color.HotPink);
-                args.Player.SendMessage("X: " + warpplateinfo.WarpplatePos.X + " Y: " + warpplateinfo.WarpplatePos.Y + " Delay: " + warpplateinfo.Delay, Color.HotPink);
+                args.Player.SendMessage("Name: " + warpplateinfo.Name + "; Destination: " + warpplateinfo.WarpDest + ";", Color.HotPink);
+                args.Player.SendMessage("X: " + warpplateinfo.WarpplatePos.X + "; Y: " + warpplateinfo.WarpplatePos.Y + 
+                    "; W: " + warpplateinfo.Area.Width + "; H: " + warpplateinfo.Area.Height + "; Delay: " + (warpplateinfo.Delay - 1), Color.HotPink);
             }
         }
 
