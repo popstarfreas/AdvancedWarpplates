@@ -51,7 +51,8 @@ namespace PluginTemplate
                 new SqlColumn("WorldID", MySqlDbType.Text),
                 new SqlColumn("UserIds", MySqlDbType.Text),
                 new SqlColumn("Protected", MySqlDbType.Int32),
-                new SqlColumn("WarpplateDestination", MySqlDbType.VarChar, 50)
+                new SqlColumn("WarpplateDestination", MySqlDbType.VarChar, 50),
+                new SqlColumn("Delay", MySqlDbType.Int32)
             );
             var creator = new SqlTableCreator(db, db.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
             creator.EnsureExists(table);
@@ -90,10 +91,19 @@ namespace PluginTemplate
                         string mergedids = reader.Get<string>("UserIds");
                         string name = reader.Get<string>("WarpplateName");
                         string warpdest = reader.Get<string>("WarpplateDestination");
+                        int Delay = 4;
+                        try
+                        {
+                            Delay = reader.Get<int>("Delay");
+                        }
+                        catch
+                        {
+                        }
 
                         string[] splitids = mergedids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
                         Warpplate r = new Warpplate(new Vector2(X1, Y1), new Rectangle(X1, Y1, width, height), name, warpdest, Protected != 0, Main.worldID.ToString());
+                        r.Delay = Delay;  // SO SILLY
 
                         try
                         {
@@ -192,7 +202,8 @@ namespace PluginTemplate
             {
                 Log.Error(ex.ToString());
             }
-            return new Warpplate();
+            //return new Warpplate();
+            return null; 
         }
 
         public bool InArea(int x, int y)
@@ -291,6 +302,7 @@ namespace PluginTemplate
         public bool DisableBuild { get; set; }
         public string WorldID { get; set; }
         public List<int> AllowedIDs { get; set; }
+        public int Delay { get; set; }
 
         public Warpplate(Vector2 warpplatepos, Rectangle Warpplate, string name, string warpdest, bool disablebuild, string WarpplateWorldIDz)
             : this()
@@ -301,6 +313,7 @@ namespace PluginTemplate
             WarpDest = warpdest;
             DisableBuild = disablebuild;
             WorldID = WarpplateWorldIDz;
+            Delay = 4;
         }
 
         public Warpplate()
