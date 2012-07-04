@@ -80,9 +80,8 @@ namespace PluginTemplate
             Commands.ChatCommands.Add(new Command("setwarpplate", warpallow, "wpallow"));
             Commands.ChatCommands.Add(new Command("setwarpplate", reloadwarp, "reloadwarp"));
             Commands.ChatCommands.Add(new Command("setwarpplate", setwarpplatedelay, "swpdl"));
-            Commands.ChatCommands.Add(new Command("setwarpplate", getwarpplatedelay, "gwpdl"));
         }
-
+        
         public void OnGreetPlayer(int ply, HandledEventArgs e)
         {
             lock (Players)
@@ -96,12 +95,14 @@ namespace PluginTemplate
             public int warpplatetime { get; set; }
             public bool warpplateuse { get; set; }
             public bool warped { get; set; }
+            public int warpcooldown { get; set; }
             public Player(int index)
             {
                 Index = index;
                 warpplatetime = 0;
                 warpplateuse = true;
                 warped = false;
+                warpcooldown = 0;
             }
         }
 
@@ -119,31 +120,39 @@ namespace PluginTemplate
                         {
                             if (player.TSPlayer.Group.HasPermission("warpplate") && player.warpplateuse)
                             {
+                                if (player.warpcooldown != 0)
+                                {
+                                    player.warpcooldown--;
+                                    continue;
+                                }
                                 string region = Warpplates.InAreaWarpplateName(player.TSPlayer.TileX, player.TSPlayer.TileY);
                                 if (region == null || region == "")
                                 {
                                     player.warpplatetime = 0;
                                     player.warped = false;
+                                    player.TSPlayer.SendMessage("FALSe"); // DEBUG ONLY
                                 }
                                 else
                                 {
+                                    player.TSPlayer.SendMessage("y.."); // DEBUG ONLY
                                     if (player.warped)
-                                        return;
+                                        continue;
                                     var warpplateinfo = Warpplates.FindWarpplate(region);
                                     var warp = Warpplates.FindWarpplate(warpplateinfo.WarpDest);
-                                    if (warp.WarpplatePos != Vector2.Zero)
+                                    if (warp != null)
                                     {
+                                        player.TSPlayer.SendMessage("yes"); // DEBUG ONLY
                                         player.warpplatetime++;
                                         if ((warpplateinfo.Delay - player.warpplatetime) > 0)
                                             player.TSPlayer.SendMessage("You Will Be Warped To " + warpplateinfo.WarpDest + " in " + (warpplateinfo.Delay - player.warpplatetime) + " Seconds");
-                                        if (player.warpplatetime == warpplateinfo.Delay)
+                                        else
                                         {
                                             if (player.TSPlayer.Teleport((int)warp.WarpplatePos.X + 2, (int)warp.WarpplatePos.Y + 3))
                                                 player.TSPlayer.SendMessage("You Have Been Warped To " + warpplateinfo.WarpDest + " via a Warpplate");
                                             player.warpplatetime = 0;
                                             player.warped = true;
-                                        }
-
+                                            player.warpcooldown = 3;
+                                        }                                        
                                     }
                                 }
                             }
@@ -196,29 +205,13 @@ namespace PluginTemplate
                 return;
             }
             int Delay;
-            if (Int32.TryParse(args.Parameters[0], out Delay))
+            if (Int32.TryParse(args.Parameters[1], out Delay))
             {
                 wp.Delay = Delay;
                 args.Player.SendMessage(String.Format("Set delay of {0} to {1} seconds", wp.Name, wp.Delay), Color.Green);
             }
             else
                 args.Player.SendMessage("Bad number specified", Color.Red);
-        }
-
-        private static void getwarpplatedelay(CommandArgs args)
-        {
-            if (args.Parameters.Count != 1)
-            {
-                args.Player.SendMessage("Invalid syntax! Proper syntax: /gwpd <warpplate name>", Color.Red);
-                return;
-            }
-            Warpplate wp = Warpplates.FindWarpplate(args.Parameters[0]);
-            if (wp == null)
-            {
-                args.Player.SendMessage("No such warpplate", Color.Red);
-                return;
-            }
-            args.Player.SendMessage(String.Format("Delay of {0}: {1} seconds", wp.Name, wp.Delay), Color.Green);
         }
 
         private static void setwarpplate(CommandArgs args)
@@ -307,8 +300,13 @@ namespace PluginTemplate
             else
                 region = Warpplates.InAreaWarpplateName(args.Player.TileX, args.Player.TileY);
             var warpplateinfo = Warpplates.FindWarpplate(region);
-            args.Player.SendMessage("WarpplateName: " + warpplateinfo.Name + " Warpplate Destination: " + warpplateinfo.WarpDest, Color.HotPink);
-            args.Player.SendMessage("Warpplate X: " + warpplateinfo.WarpplatePos.X + " Warpplate Y: " + warpplateinfo.WarpplatePos.Y, Color.HotPink);
+            if (warpplateinfo == null)
+                args.Player.SendMessage("No Such Warpplate", Color.Red);
+            else
+            {
+                args.Player.SendMessage("Name: " + warpplateinfo.Name + " Destination: " + warpplateinfo.WarpDest, Color.HotPink);
+                args.Player.SendMessage("X: " + warpplateinfo.WarpplatePos.X + " Y: " + warpplateinfo.WarpplatePos.Y + " Delay: " + warpplateinfo.Delay, Color.HotPink);
+            }
         }
 
         private static void reloadwarp(CommandArgs args)

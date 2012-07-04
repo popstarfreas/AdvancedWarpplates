@@ -143,8 +143,8 @@ namespace PluginTemplate
             }
             try
             {
-                database.Query("INSERT INTO Warpplates (X1, Y1, width, height, WarpplateName, WorldID, UserIds, Protected, WarpplateDestination) VALUES (@0, @1, @2, @3, @4, @5, @6, @7, @8);",
-                    tx, ty, width, height, Warpplatename, worldid, "", 1, Warpdest);
+                database.Query("INSERT INTO Warpplates (X1, Y1, width, height, WarpplateName, WorldID, UserIds, Protected, WarpplateDestination, Delay) VALUES (@0, @1, @2, @3, @4, @5, @6, @7, @8, @9);",
+                    tx, ty, width, height, Warpplatename, worldid, "", 1, Warpdest, 4);
                 Warpplates.Add(new Warpplate(new Vector2(tx, ty), new Rectangle(tx, ty, width, height), Warpplatename, worldid, true, Warpdest));
                 return true;
             }
@@ -202,7 +202,7 @@ namespace PluginTemplate
             {
                 Log.Error(ex.ToString());
             }
-            //return new Warpplate();
+            //return new Warpplate();  // <-- that's dumb
             return null; 
         }
 
