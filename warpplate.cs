@@ -79,8 +79,8 @@ namespace PluginTemplate
             Commands.ChatCommands.Add(new Command("setwarpplate", wpi, "wpi"));
             Commands.ChatCommands.Add(new Command("setwarpplate", warpallow, "wpallow"));
             Commands.ChatCommands.Add(new Command("setwarpplate", reloadwarp, "reloadwarp"));
-            Commands.ChatCommands.Add(new Command("setwarpplate", setwarpplatedelay, "swpd"));
-            Commands.ChatCommands.Add(new Command("setwarpplate", getwarpplatedelay, "gwpd"));
+            Commands.ChatCommands.Add(new Command("setwarpplate", setwarpplatedelay, "swpdl"));
+            Commands.ChatCommands.Add(new Command("setwarpplate", getwarpplatedelay, "gwpdl"));
         }
 
         public void OnGreetPlayer(int ply, HandledEventArgs e)
