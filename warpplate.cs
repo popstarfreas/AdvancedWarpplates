@@ -278,8 +278,7 @@ namespace PluginTemplate
             string label = args.Parameters[args.Parameters.Count - 1];
             wp.Label = label;
             if (Warpplates.UpdateWarpplate(wp.Name))
-                args.Player.SendMessage(String.Format("Set label of {0} to {1}", wp.Name, String.IsNullOrEmpty(label) ?
-                    wp.Name + " (default)" : label), Color.Green);
+                args.Player.SendMessage(String.Format("Set label of {0} to {1}", wp.Name, D(wp)), Color.Green);
             else
                 args.Player.SendMessage("Something went wrong", Color.Red);
         }
@@ -439,6 +438,11 @@ namespace PluginTemplate
             return String.IsNullOrEmpty(s) ? "(none)" : s;
         }
 
+        private static string D(Warpplate wp)
+        {
+            return String.IsNullOrEmpty(wp.Label) ? wp.Name + " (default)" : wp.Label;
+        }
+
         private static void wpi(CommandArgs args)
         {
             string region = "";
@@ -451,7 +455,7 @@ namespace PluginTemplate
                 args.Player.SendMessage("No Such Warpplate", Color.Red);
             else
             {
-                args.Player.SendMessage("Name: " + warpplateinfo.Name + "; Label: " + S(warpplateinfo.Label) 
+                args.Player.SendMessage("Name: " + warpplateinfo.Name + "; Label: " + D(warpplateinfo) 
                     + "Destination: " + S(warpplateinfo.WarpDest) + ";", Color.HotPink);
                 args.Player.SendMessage("X: " + warpplateinfo.WarpplatePos.X + "; Y: " + warpplateinfo.WarpplatePos.Y + 
                     "; W: " + warpplateinfo.Area.Width + "; H: " + warpplateinfo.Area.Height + "; Delay: " + (warpplateinfo.Delay - 1), Color.HotPink);
