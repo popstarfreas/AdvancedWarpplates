@@ -245,7 +245,7 @@ namespace PluginTemplate
             {
                 Rectangle r;
                 r = wp.Area;
-                r.Width = Width;
+                r.Width = Width; 
                 wp.Area = r;
                 if (Warpplates.UpdateWarpplate(wp.Name))
                     args.Player.SendMessage(String.Format("Set width of {0} to {1} blocks", wp.Name, Width), Color.Green);
