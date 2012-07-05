@@ -12,3 +12,9 @@ C:\Users\DarkunderdoG\Desktop\tshock\twitchy0905 - Copy\Advanced-Warpplates\bin\
 C:\Users\DarkunderdoG\Desktop\tshock\twitchy0905 - Copy\Advanced-Warpplates\bin\Debug\AdvancedWarpplate.pdb
 C:\Users\DarkunderdoG\Desktop\tshock\twitchy0905 - Copy\Advanced-Warpplates\obj\x86\Debug\AdvancedWarpplate.dll
 C:\Users\DarkunderdoG\Desktop\tshock\twitchy0905 - Copy\Advanced-Warpplates\obj\x86\Debug\AdvancedWarpplate.pdb
+C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\bin\Debug\AdvancedWarpplate.dll
+C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\bin\Debug\AdvancedWarpplate.pdb
+C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\bin\Debug\TerrariaServer.exe
+C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\obj\x86\Debug\AdvancedWarpplate.dll
+C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\obj\x86\Debug\AdvancedWarpplate.pdb

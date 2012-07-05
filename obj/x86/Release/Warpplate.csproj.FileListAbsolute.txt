@@ -1,0 +1,6 @@
+C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\bin\Release\AdvancedWarpplate.dll
+C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\bin\Release\AdvancedWarpplate.pdb
+C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\bin\Release\TerrariaServer.exe
+C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\obj\x86\Release\AdvancedWarpplate.dll
+C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\obj\x86\Release\AdvancedWarpplate.pdb
