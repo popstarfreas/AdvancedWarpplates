@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Terraria;
-using Hooks;
 using MySql.Data.MySqlClient;
 using TShockAPI.DB;
 using TShockAPI;
 using System.ComponentModel;
 using System.Linq;
 using System.Web;
+using TerrariaApi.Server;
 
 namespace PluginTemplate
 {
-    [APIVersion(1, 12)]
+    [ApiVersion(1, 16)]
     public class WarpplatePlugin : TerrariaPlugin
     {
         public static List<Player> Players = new List<Player>();
@@ -38,28 +38,28 @@ namespace PluginTemplate
         public override void Initialize()
         {
             Warpplates = new WarpplateManager(TShock.DB);
-            GameHooks.PostInitialize += OnPostInit;
-            GameHooks.Initialize += OnInitialize;
-            GameHooks.Update += OnUpdate;
-            NetHooks.GreetPlayer += OnGreetPlayer;
-            ServerHooks.Leave += OnLeave;
+            ServerApi.Hooks.GamePostInitialize.Register(this, OnPostInit);
+            ServerApi.Hooks.GameInitialize.Register(this, OnInitialize);
+            ServerApi.Hooks.GameUpdate.Register(this, OnUpdate);
+            ServerApi.Hooks.NetGreetPlayer.Register(this, OnGreetPlayer);
+            ServerApi.Hooks.ServerLeave.Register(this, OnLeave);
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                GameHooks.PostInitialize -= OnPostInit;
-                GameHooks.Initialize -= OnInitialize;
-                GameHooks.Update -= OnUpdate;
-                NetHooks.GreetPlayer -= OnGreetPlayer;
-                ServerHooks.Leave -= OnLeave;
+                ServerApi.Hooks.GamePostInitialize.Deregister(this, OnPostInit);
+                ServerApi.Hooks.GameInitialize.Deregister(this, OnInitialize);
+                ServerApi.Hooks.GameUpdate.Deregister(this, OnUpdate);
+                ServerApi.Hooks.NetGreetPlayer.Deregister(this, OnGreetPlayer);
+                ServerApi.Hooks.ServerLeave.Deregister(this, OnLeave);
             }
 
             base.Dispose(disposing);
         }
 
-        private void OnPostInit()
+        private void OnPostInit(EventArgs args)
         {
             Warpplates.ReloadAllWarpplates();
         }
@@ -70,7 +70,7 @@ namespace PluginTemplate
             Order = 1;
         }
 
-        public void OnInitialize()
+        public void OnInitialize(EventArgs args)
         {
             Commands.ChatCommands.Add(new Command("setwarpplate", setwarpplate, "swp"));
             Commands.ChatCommands.Add(new Command("setwarpplate", delwarpplate, "dwp"));
@@ -86,10 +86,10 @@ namespace PluginTemplate
             Commands.ChatCommands.Add(new Command("setwarpplate", setwarpplatelabel, "swpl"));
         }
         
-        public void OnGreetPlayer(int ply, HandledEventArgs e)
+        public void OnGreetPlayer(GreetPlayerEventArgs args)
         {
             lock (Players)
-                Players.Add(new Player(ply));
+                Players.Add(new Player(args.Who));
         }
 
         public class Player
@@ -112,7 +112,7 @@ namespace PluginTemplate
 
         private DateTime LastCheck = DateTime.UtcNow;
 
-        private void OnUpdate()
+        private void OnUpdate(EventArgs args)
         {
             if ((DateTime.UtcNow - LastCheck).TotalSeconds >= 1)
             {
@@ -162,13 +162,13 @@ namespace PluginTemplate
             }
         }
 
-        private void OnLeave(int ply)
+        private void OnLeave(LeaveEventArgs args)
         {
             lock (Players)
             {
                 for (int i = 0; i < Players.Count; i++)
                 {
-                    if (Players[i].Index == ply)
+                    if (Players[i].Index == args.Who)
                     {
                         Players.RemoveAt(i);
                         break; //Found the player, break.
