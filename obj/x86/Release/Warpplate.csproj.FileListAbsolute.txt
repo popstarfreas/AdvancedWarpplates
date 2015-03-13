@@ -4,7 +4,6 @@ C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\bin\Release\AdvancedW
 C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\bin\Release\TerrariaServer.exe
 C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\obj\x86\Release\AdvancedWarpplate.dll
 C:\Users\Андрей\Documents\GitHub\Advanced-Warpplates\obj\x86\Release\AdvancedWarpplate.pdb
-C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\obj\x86\Release\Warpplate.csprojResolveAssemblyReference.cache
 C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\obj\x86\Release\AdvancedWarpplate.dll
 C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\obj\x86\Release\AdvancedWarpplate.pdb
 C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\bin\Release\AdvancedWarpplate.dll
@@ -16,3 +15,4 @@ C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\bin\Release\Newtonsoft.Json.d
 C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\bin\Release\TerrariaServer.exe
 C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\bin\Release\TShockAPI.dll
 C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\bin\Release\HttpServer.dll
+C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\bin\Release\TerrariaServer.pdb

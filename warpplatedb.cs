@@ -55,7 +55,7 @@ namespace PluginTemplate
                 new SqlColumn("Label", MySqlDbType.Text)
             );
             var creator = new SqlTableCreator(db, db.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
-            creator.EnsureExists(table);
+            creator.EnsureTableStructure(table);
 
             ReloadAllWarpplates();
 
@@ -70,7 +70,7 @@ namespace PluginTemplate
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+                TShock.Log.Error(ex.ToString());
             }
         }
 
@@ -108,15 +108,15 @@ namespace PluginTemplate
                                 if (Int32.TryParse(splitids[i], out id)) // if unparsable, it's not an int, so silently skip
                                     r.AllowedIDs.Add(id);
                                 else
-                                    Log.Warn("One of your UserIDs is not a usable integer: " + splitids[i]);
+									TShock.Log.Warn("One of your UserIDs is not a usable integer: " + splitids[i]);
                             }
                         }
                         catch (Exception e)
                         {
-                            Log.Error("Your database contains invalid UserIDs (they should be ints).");
-                            Log.Error("A lot of things will fail because of this. You must manually delete and re-create the allowed field.");
-                            Log.Error(e.ToString());
-                            Log.Error(e.StackTrace);
+							TShock.Log.Error("Your database contains invalid UserIDs (they should be ints).");
+							TShock.Log.Error("A lot of things will fail because of this. You must manually delete and re-create the allowed field.");
+							TShock.Log.Error(e.ToString());
+							TShock.Log.Error(e.StackTrace);
                         }
 
                         Warpplates.Add(r);
@@ -125,7 +125,7 @@ namespace PluginTemplate
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+				TShock.Log.Error(ex.ToString());
             }
         }
 
@@ -144,7 +144,7 @@ namespace PluginTemplate
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+				TShock.Log.Error(ex.ToString());
             }
             return false;
         }
@@ -176,7 +176,7 @@ namespace PluginTemplate
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex.ToString());
+					TShock.Log.Error(ex.ToString());
                 }
             }
             return false;
@@ -196,7 +196,7 @@ namespace PluginTemplate
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex.ToString());
+					TShock.Log.Error(ex.ToString());
                 }
             }
             return false;
@@ -214,7 +214,7 @@ namespace PluginTemplate
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+				TShock.Log.Error(ex.ToString());
             }
             //return new Warpplate();  // <-- that's dumb
             return null; 
@@ -296,7 +296,7 @@ namespace PluginTemplate
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+				TShock.Log.Error(ex.ToString());
             }
             return WarpplatesTemp;
         }
