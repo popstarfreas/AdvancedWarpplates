@@ -2,13 +2,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Terraria;
-using MySql.Data.MySqlClient;
-using TShockAPI.DB;
-using TShockAPI;
-using System.ComponentModel;
-using System.Linq;
-using System.Web;
 using TerrariaApi.Server;
+using TShockAPI;
 
 namespace PluginTemplate
 {

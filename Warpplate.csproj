@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AdvancedWarpplate</RootNamespace>
     <AssemblyName>AdvancedWarpplate</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -25,6 +25,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>true</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -34,6 +35,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -49,19 +51,15 @@
     </Reference>
     <Reference Include="Mono.Data.Sqlite, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Desktop\TShock.426\ServerPlugins\Mono.Data.Sqlite.dll</HintPath>
+      <HintPath>..\..\..\Desktop\TShock_4.3\ServerPlugins\Mono.Data.Sqlite.dll</HintPath>
     </Reference>
     <Reference Include="MySql.Data, Version=6.4.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Desktop\TShock.426\ServerPlugins\MySql.Data.dll</HintPath>
+      <HintPath>..\..\..\Desktop\TShock_4.3\ServerPlugins\MySql.Data.dll</HintPath>
     </Reference>
-    <Reference Include="MySql.Web, Version=6.4.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Desktop\TShock.426\ServerPlugins\MySql.Web.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.0.2.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Desktop\TShock.426\ServerPlugins\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\Desktop\TShock_4.3\ServerPlugins\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -71,11 +69,11 @@
     <Reference Include="System.Web.Services" />
     <Reference Include="TerrariaServer, Version=1.15.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Desktop\pre_tshock_4211\TerrariaServer.exe</HintPath>
+      <HintPath>..\..\..\Desktop\TShock_4.3\TerrariaServer.exe</HintPath>
     </Reference>
-    <Reference Include="TShockAPI, Version=4.2.7.0, Culture=neutral, processorArchitecture=x86">
+    <Reference Include="TShockAPI, Version=4.2.10.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Desktop\pre_tshock_4211\ServerPlugins\TShockAPI.dll</HintPath>
+      <HintPath>..\..\..\Desktop\TShock_4.3\ServerPlugins\TShockAPI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
