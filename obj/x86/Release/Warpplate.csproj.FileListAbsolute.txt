@@ -7,6 +7,6 @@ C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\bin\Release\TerrariaServer.ex
 C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\bin\Release\TShockAPI.dll
 C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\bin\Release\HttpServer.dll
 C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\bin\Release\BCrypt.Net.dll
-C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\obj\x86\Release\Warpplate.csprojResolveAssemblyReference.cache
 C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\obj\x86\Release\AdvancedWarpplate.dll
 C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\obj\x86\Release\AdvancedWarpplate.pdb
+C:\Users\Clay\Documents\GitHub\Advanced-Warpplates\obj\x86\Release\Warpplate.csprojResolveAssemblyReference.cache
