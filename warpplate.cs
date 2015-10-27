@@ -7,7 +7,7 @@ using TShockAPI;
 
 namespace PluginTemplate
 {
-    [ApiVersion(1, 21)]
+    [ApiVersion(1, 22)]
     public class WarpplatePlugin : TerrariaPlugin
     {
         public static List<Player> Players = new List<Player>();
