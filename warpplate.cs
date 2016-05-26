@@ -1,4 +1,9 @@
-﻿using System;
+﻿/*
+ * "Created by DarkunderdoG, modified by 2.0"
+ * 
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Terraria;
@@ -7,7 +12,7 @@ using TShockAPI;
 
 namespace PluginTemplate
 {
-    [ApiVersion(1, 22)]
+    [ApiVersion(1, 23)]
     public class WarpplatePlugin : TerrariaPlugin
     {
         public static List<Player> Players = new List<Player>();
@@ -19,7 +24,7 @@ namespace PluginTemplate
         }
         public override string Author
         {
-            get { return "Created by DarkunderdoG, modified by 2.0"; }
+            get { return "Maintained by Zaicon"; }
         }
         public override string Description
         {
