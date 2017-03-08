@@ -51,6 +51,7 @@ namespace PluginTemplate
                 new SqlColumn("UserIds", MySqlDbType.Text),
                 new SqlColumn("Protected", MySqlDbType.Int32),
                 new SqlColumn("WarpplateDestination", MySqlDbType.VarChar, 50),
+                new SqlColumn("Type", MySqlDbType.Int32) { DefaultValue = "0", NotNull = true },
                 new SqlColumn("Delay", MySqlDbType.Int32),
                 new SqlColumn("Label", MySqlDbType.Text)
             );
@@ -90,13 +91,14 @@ namespace PluginTemplate
                         int Protected = reader.Get<int>("Protected");
                         string mergedids = reader.Get<string>("UserIds");
                         string name = reader.Get<string>("WarpplateName");
+                        int type = reader.Get<int>("Type"); 
                         string warpdest = reader.Get<string>("WarpplateDestination");
                         int Delay = reader.Get<int>("Delay");
                         string label = reader.Get<string>("Label");
 
                         string[] splitids = mergedids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                        Warpplate r = new Warpplate(new Vector2(X1, Y1), new Rectangle(X1, Y1, width, height), name, warpdest, Protected != 0, Main.worldID.ToString(), label);
+                        Warpplate r = new Warpplate(new Vector2(X1, Y1), new Rectangle(X1, Y1, width, height), name, warpdest, Protected != 0, Main.worldID.ToString(), label, type);
                         r.Delay = Delay;
 
                         try
@@ -139,7 +141,7 @@ namespace PluginTemplate
             {
                 database.Query("INSERT INTO Warpplates (X1, Y1, width, height, WarpplateName, WorldID, UserIds, Protected, WarpplateDestination, Delay, Label) VALUES (@0, @1, @2, @3, @4, @5, @6, @7, @8, @9, @10);",
                     tx, ty, width, height, Warpplatename, worldid, "", 1, Warpdest, 4, "");
-                Warpplates.Add(new Warpplate(new Vector2(tx, ty), new Rectangle(tx, ty, width, height), Warpplatename, worldid, true, Warpdest, ""));
+                Warpplates.Add(new Warpplate(new Vector2(tx, ty), new Rectangle(tx, ty, width, height), Warpplatename, worldid, true, Warpdest, "", 0));
                 return true;
             }
             catch (Exception ex)
@@ -266,12 +268,12 @@ namespace PluginTemplate
             return false;
         }
 
-        public bool adddestination(string WarpplateName, String WarpDestination)
+        public bool adddestination(string WarpplateName, string WarpDestination, int Type = 0)
         {
             Warpplate r = GetWarpplateByName(WarpplateName);
             if (r != null)
             {
-                int q = database.Query("UPDATE Warpplates SET WarpplateDestination=@0 WHERE WarpplateName=@1 AND WorldID=@2;", WarpDestination, WarpplateName, Main.worldID.ToString());
+                int q = database.Query("UPDATE Warpplates SET WarpplateDestination=@0, Type=@3 WHERE WarpplateName=@1 AND WorldID=@2;", WarpDestination, WarpplateName, Main.worldID.ToString(), Type);
                 r.WarpDest = WarpDestination;
                 if (q > 0)
                     return true;
@@ -327,8 +329,9 @@ namespace PluginTemplate
         public List<int> AllowedIDs { get; set; }
         public int Delay { get; set; }
         public string Label { get; set; }
+        public int Type { get; set; }
 
-        public Warpplate(Vector2 warpplatepos, Rectangle Warpplate, string name, string warpdest, bool disablebuild, string WarpplateWorldIDz, string label)
+        public Warpplate(Vector2 warpplatepos, Rectangle Warpplate, string name, string warpdest, bool disablebuild, string WarpplateWorldIDz, string label, int type)
             : this()
         {
             WarpplatePos = warpplatepos;
@@ -339,6 +342,7 @@ namespace PluginTemplate
             DisableBuild = disablebuild;
             WorldID = WarpplateWorldIDz;
             Delay = 4;
+            Type = type;
         }
 
         public Warpplate()
@@ -350,6 +354,7 @@ namespace PluginTemplate
             DisableBuild = true;
             WorldID = string.Empty;
             AllowedIDs = new List<int>();
+            Type = 0;
         }
 
         public bool InArea(Rectangle point)

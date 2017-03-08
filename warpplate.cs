@@ -1,14 +1,11 @@
-﻿/*
- * "Created by DarkunderdoG, modified by 2.0"
- * 
- */
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Timers;
 using Terraria;
 using TerrariaApi.Server;
 using TShockAPI;
+using Microsoft.Xna.Framework;
 
 namespace PluginTemplate
 {
@@ -17,6 +14,7 @@ namespace PluginTemplate
     {
         public static List<Player> Players = new List<Player>();
         public static WarpplateManager Warpplates;
+        public static Timer QuickUpdate = new Timer(1000);
 
         public override string Name
         {
@@ -24,7 +22,7 @@ namespace PluginTemplate
         }
         public override string Author
         {
-            get { return "Maintained by Zaicon"; }
+            get { return "Maintained by popstarfreas"; }
         }
         public override string Description
         {
@@ -40,7 +38,6 @@ namespace PluginTemplate
             Warpplates = new WarpplateManager(TShock.DB);
             ServerApi.Hooks.GamePostInitialize.Register(this, OnPostInit);
             ServerApi.Hooks.GameInitialize.Register(this, OnInitialize);
-            ServerApi.Hooks.GameUpdate.Register(this, OnUpdate);
             ServerApi.Hooks.NetGreetPlayer.Register(this, OnGreetPlayer);
             ServerApi.Hooks.ServerLeave.Register(this, OnLeave);
         }
@@ -51,7 +48,6 @@ namespace PluginTemplate
             {
                 ServerApi.Hooks.GamePostInitialize.Deregister(this, OnPostInit);
                 ServerApi.Hooks.GameInitialize.Deregister(this, OnInitialize);
-                ServerApi.Hooks.GameUpdate.Deregister(this, OnUpdate);
                 ServerApi.Hooks.NetGreetPlayer.Deregister(this, OnGreetPlayer);
                 ServerApi.Hooks.ServerLeave.Deregister(this, OnLeave);
             }
@@ -62,6 +58,8 @@ namespace PluginTemplate
         private void OnPostInit(EventArgs args)
         {
             Warpplates.ReloadAllWarpplates();
+            QuickUpdate.Elapsed += OnQuickUpdate;
+            QuickUpdate.Enabled = true;
         }
 
         public WarpplatePlugin(Main game)
@@ -79,11 +77,12 @@ namespace PluginTemplate
             Commands.ChatCommands.Add(new Command("warpplate.set", wpi, "wpi"));
             Commands.ChatCommands.Add(new Command("warpplate.use", warpallow, "wpa"));
             Commands.ChatCommands.Add(new Command("warpplate.set", reloadwarp, "rwp"));
-            Commands.ChatCommands.Add(new Command("warpplate.set", setwarpplatedelay, "swpdl"));
+            Commands.ChatCommands.Add(new Command("warpplate.set", SetWarpplateDelay, "swpdl"));
             Commands.ChatCommands.Add(new Command("warpplate.set", setwarpplatewidth, "swpw"));
             Commands.ChatCommands.Add(new Command("warpplate.set", setwarpplateheight, "swph"));
             Commands.ChatCommands.Add(new Command("warpplate.set", setwarpplatesize, "swps"));
             Commands.ChatCommands.Add(new Command("warpplate.set", setwarpplatelabel, "swpl"));
+            Commands.ChatCommands.Add(new Command("warpplate.setdimensional", setwarpplatedimension, "swpdim"));
         }
         
         public void OnGreetPlayer(GreetPlayerEventArgs args)
@@ -112,11 +111,9 @@ namespace PluginTemplate
 
         private DateTime LastCheck = DateTime.UtcNow;
 
-        private void OnUpdate(EventArgs args)
+        private void OnQuickUpdate(object sender, ElapsedEventArgs args)
         {
-            if ((DateTime.UtcNow - LastCheck).TotalSeconds >= 1)
-            {
-                LastCheck = DateTime.UtcNow;
+            try {
                 lock (Players)
                     foreach (Player player in Players)
                     {
@@ -141,24 +138,45 @@ namespace PluginTemplate
                                         continue;
                                     var warpplateinfo = Warpplates.FindWarpplate(region);
                                     var warp = Warpplates.FindWarpplate(warpplateinfo.WarpDest);
-                                    if (warp != null)
+                                    if (warpplateinfo.Type == 0 && warp != null)
                                     {
                                         player.warpplatetime++;
                                         if ((warpplateinfo.Delay - player.warpplatetime) > 0)
                                             player.TSPlayer.SendInfoMessage("You will be warped to " + Warpplates.GetLabel(warpplateinfo.WarpDest) + " in " + (warpplateinfo.Delay - player.warpplatetime) + " seconds");
                                         else
                                         {
-                                            if (player.TSPlayer.Teleport((int)(warp.WarpplatePos.X * 16) + 2, (int)(warp.WarpplatePos.Y*16) + 3))
+                                            if (player.TSPlayer.Teleport((int)(warp.WarpplatePos.X * 16) + 2, (int)(warp.WarpplatePos.Y * 16) + 3))
                                                 player.TSPlayer.SendInfoMessage("You have been warped to " + Warpplates.GetLabel(warpplateinfo.WarpDest) + " via a Warpplate");
                                             player.warpplatetime = 0;
                                             player.warped = true;
                                             player.warpcooldown = 3;
-                                        }                                        
+                                        }
+                                    } else if (warpplateinfo.Type == 1)
+                                    {
+                                        player.warpplatetime++;
+                                        if ((warpplateinfo.Delay - player.warpplatetime) > 0)
+                                            player.TSPlayer.SendInfoMessage("Shifting to " + warpplateinfo.Label + " in " + (warpplateinfo.Delay - player.warpplatetime) + " seconds");
+                                        else
+                                        {
+                                            byte[] data = (new AdvancedWarpplate.PacketFactory())
+                                                .SetType(67)
+                                                .PackInt16(2)
+                                                .PackString(warpplateinfo.WarpDest)
+                                                .GetByteData();
+
+                                            player.TSPlayer.SendRawData(data);
+                                            player.warpplatetime = 0;
+                                            player.warped = true;
+                                            player.warpcooldown = 3;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+            } catch (Exception ex)
+            {
+                TShock.Log.Error(ex.ToString());
             }
         }
 
@@ -191,7 +209,7 @@ namespace PluginTemplate
             }
         }
 
-        private static void setwarpplatedelay(CommandArgs args)
+        private static void SetWarpplateDelay(CommandArgs args)
         {
             string region = "";
             if (args.Parameters.Count == 2)
@@ -281,6 +299,58 @@ namespace PluginTemplate
                 args.Player.SendSuccessMessage(String.Format("Set label of {0} to {1}", wp.Name, D(wp)));
             else
                 args.Player.SendErrorMessage("Something went wrong");
+        }
+
+        private static void setwarpplatedimension(CommandArgs args)
+        {
+            string region = "";
+            if (args.Parameters.Count == 2)
+                region = args.Parameters[0];
+            else if (args.Parameters.Count == 1)
+                region = Warpplates.InAreaWarpplateName(args.Player.TileX, args.Player.TileY);
+            else
+            {
+                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /swpdim [<warpplate name>] <dimension name>");
+                args.Player.SendErrorMessage("Type /swpdim [<warpplate name>] \"\" to set dimension to none");
+                return;
+            }
+            Warpplate wp = Warpplates.FindWarpplate(region);
+            if (wp == null)
+            {
+                args.Player.SendErrorMessage("No such warpplate");
+                return;
+            }
+
+            // Get Dimension Name from parameters
+            string dimension = args.Parameters[args.Parameters.Count - 1];
+            wp.WarpDest = dimension;
+
+            // Set type to 0 (non-dimensional) if the specified name was empty
+            if (dimension.Length == 0)
+            {
+                wp.Type = 0;
+            }
+            else
+            {
+                wp.Type = 1;
+            }
+
+            // Update warpplate in DB
+            if (Warpplates.adddestination(wp.Name, dimension, wp.Type))
+            {
+                if (wp.Type == 0)
+                {
+                    args.Player.SendSuccessMessage(String.Format("Removed Dimension Destination from {0}", wp.Name));
+                }
+                else
+                {
+                    args.Player.SendSuccessMessage(String.Format("Set Dimension Destination of {0} to {1}", wp.Name, dimension));
+                }
+            }
+            else
+            {
+                args.Player.SendErrorMessage("Something went wrong");
+            }
         }
 
         private static void setwarpplateheight(CommandArgs args)
