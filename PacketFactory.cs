@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using System.IO;
 
-namespace AdvancedWarpplate
+namespace AdvancedWarpplates
 {
+    /// <summary>
+    /// A friendly class that allows easy writing of packets
+    /// </summary>
     public class PacketFactory
     {
         private MemoryStream memoryStream;

@@ -1,21 +1,3 @@
-﻿/*   
-TShock, a server mod for Terraria
-Copyright (C) 2011 The TShock Team
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 ﻿using System;
 using System.Collections.Generic;
 using Terraria;
@@ -23,21 +5,19 @@ using TShockAPI;
 using TShockAPI.DB;
 using MySql.Data.MySqlClient;
 using System.Threading;
-using System.ComponentModel;
-using System.IO;
 using System.Data;
-using System.Drawing;
 using System.Linq;
+using Microsoft.Xna.Framework;
+using System.Threading.Tasks;
 
-namespace PluginTemplate
+namespace AdvancedWarpplates
 {
-    public class WarpplateManager
+    public class WarpplateDB
     {
-        public List<Warpplate> Warpplates = new List<Warpplate>();
-
         private IDbConnection database;
+        private object syncLock = new object();
 
-        public WarpplateManager(IDbConnection db)
+        public WarpplateDB(IDbConnection db)
         {
             database = db;
 
@@ -58,16 +38,58 @@ namespace PluginTemplate
             var creator = new SqlTableCreator(db, db.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
             creator.EnsureTableStructure(table);
 
-            ReloadAllWarpplates();
+
+            Task.Run(async () =>
+            {
+                await ReloadAllWarpplates();
+            });
 
         }
 
-        public void ConvertDB()
+        internal async Task<QueryResult> QueryReader(string query, params object[] args)
+        {
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    lock (syncLock)
+                    {
+                        return database.QueryReader(query, args);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    TShock.Log.Error(ex.ToString());
+                    return null;
+                }
+            });
+        }
+
+        internal async Task<int> Query(string query, params object[] args)
+        {
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    lock (syncLock)
+                    {
+                        return database.Query(query, args);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    TShock.Log.Error(ex.ToString());
+                    return 0;
+                }
+            });
+        }
+
+        public async Task ConvertDB()
         {
             try
             {
-                database.Query("UPDATE Warpplates SET WorldID=@0, UserIds='', Delay=4", Main.worldID.ToString());
-                ReloadAllWarpplates();
+                await Query("UPDATE Warpplates SET WorldID=@0, UserIds='', Delay=4", Main.worldID.ToString());
+                await ReloadAllWarpplates();
             }
             catch (Exception ex)
             {
@@ -75,13 +97,14 @@ namespace PluginTemplate
             }
         }
 
-        public void ReloadAllWarpplates()
+        public async Task<List<Warpplate>> ReloadAllWarpplates()
         {
+            List<Warpplate> warpplates = new List<Warpplate>();
+
             try
             {
-                using (var reader = database.QueryReader("SELECT * FROM Warpplates WHERE WorldID=@0", Main.worldID.ToString()))
+                using (var reader = await QueryReader("SELECT * FROM Warpplates WHERE WorldID=@0", Main.worldID.ToString()))
                 {
-                    Warpplates.Clear();
                     while (reader.Read())
                     {
                         int X1 = reader.Get<int>("X1");
@@ -91,7 +114,7 @@ namespace PluginTemplate
                         int Protected = reader.Get<int>("Protected");
                         string mergedids = reader.Get<string>("UserIds");
                         string name = reader.Get<string>("WarpplateName");
-                        int type = reader.Get<int>("Type"); 
+                        int type = reader.Get<int>("Type");
                         string warpdest = reader.Get<string>("WarpplateDestination");
                         int Delay = reader.Get<int>("Delay");
                         string label = reader.Get<string>("Label");
@@ -110,39 +133,37 @@ namespace PluginTemplate
                                 if (Int32.TryParse(splitids[i], out id)) // if unparsable, it's not an int, so silently skip
                                     r.AllowedIDs.Add(id);
                                 else
-									TShock.Log.Warn("One of your UserIDs is not a usable integer: " + splitids[i]);
+                                    TShock.Log.Warn("One of your UserIDs is not a usable integer: " + splitids[i]);
                             }
                         }
                         catch (Exception e)
                         {
-							TShock.Log.Error("Your database contains invalid UserIDs (they should be ints).");
-							TShock.Log.Error("A lot of things will fail because of this. You must manually delete and re-create the allowed field.");
-							TShock.Log.Error(e.ToString());
-							TShock.Log.Error(e.StackTrace);
+                            TShock.Log.Error("Your database contains invalid UserIDs (they should be ints).");
+                            TShock.Log.Error("A lot of things will fail because of this. You must manually delete and re-create the allowed field.");
+                            TShock.Log.Error(e.ToString());
+                            TShock.Log.Error(e.StackTrace);
                         }
 
-                        Warpplates.Add(r);
+                        warpplates.Add(r);
                     }
                 }
             }
             catch (Exception ex)
             {
-				TShock.Log.Error(ex.ToString());
+                TShock.Log.Error(ex.ToString());
             }
+
+            return warpplates;
         }
 
-        public bool AddWarpplate(int tx, int ty, int width, int height, string Warpplatename, string Warpdest, string worldid)
+        public async Task<bool> AddWarpplate(int tx, int ty, int width, int height, string Warpplatename, string Warpdest, string worldid)
         {
-            if (GetWarpplateByName(Warpplatename) != null)
-            {
-                return false;
-            }
             try
             {
-                database.Query("INSERT INTO Warpplates (X1, Y1, width, height, WarpplateName, WorldID, UserIds, Protected, WarpplateDestination, Delay, Label) VALUES (@0, @1, @2, @3, @4, @5, @6, @7, @8, @9, @10);",
+                int result = await Query("INSERT INTO Warpplates (X1, Y1, width, height, WarpplateName, WorldID, UserIds, Protected, WarpplateDestination, Delay, Label) VALUES (@0, @1, @2, @3, @4, @5, @6, @7, @8, @9, @10);",
                     tx, ty, width, height, Warpplatename, worldid, "", 1, Warpdest, 4, "");
-                Warpplates.Add(new Warpplate(new Vector2(tx, ty), new Rectangle(tx, ty, width, height), Warpplatename, worldid, true, Warpdest, "", 0));
-                return true;
+
+                return result > 0;
             }
             catch (Exception ex)
             {
@@ -151,219 +172,61 @@ namespace PluginTemplate
             return false;
         }
 
-        public bool DeleteWarpplate(string name)
+        public async Task<bool> DeleteWarpplate(Warpplate warpplate)
         {
-            Warpplate r = GetWarpplateByName(name);
-            if (r != null)
+            if (warpplate != null)
             {
-                int q = database.Query("DELETE FROM Warpplates WHERE WarpplateName=@0 AND WorldID=@1", name, Main.worldID.ToString());
-                Warpplates.Remove(r);
-                if (q > 0)
-                    return true;
+                int result = await Query("DELETE FROM Warpplates WHERE WarpplateName=@0 AND WorldID=@1", warpplate.Name, Main.worldID.ToString());
+                return result > 0;
             }
             return false;
         }
 
-        public bool SetWarpplateState(string name, bool state)
-        {
-            var Warpplate = GetWarpplateByName(name);
-            if (Warpplate != null)
-            {
-                try
-                {
-                    Warpplate.DisableBuild = state;
-                    database.Query("UPDATE Warpplates SET Protected=@0 WHERE WarpplateName=@1 AND WorldID=@2", state ? 1 : 0, name, Main.worldID.ToString());
-
-                    return true;
-                }
-                catch (Exception ex)
-                {
-					TShock.Log.Error(ex.ToString());
-                }
-            }
-            return false;
-        }
-
-        public bool UpdateWarpplate(string name)
-        {
-            var wp = GetWarpplateByName(name);
-            if (wp != null)
-            {
-                try
-                {
-                    database.Query("UPDATE Warpplates SET width=@0, height=@1, Delay=@2, Label=@3 WHERE WarpplateName=@4 AND WorldID=@5",
-                        wp.Area.Width, wp.Area.Height, wp.Delay, wp.Label, name, Main.worldID.ToString());
-
-                    return true;
-                }
-                catch (Exception ex)
-                {
-					TShock.Log.Error(ex.ToString());
-                }
-            }
-            return false;
-        }
-
-        public Warpplate FindWarpplate(string name)
+        public async Task<bool> SetWarpplateState(Warpplate warpplate, bool state)
         {
             try
             {
-                foreach (Warpplate wp in Warpplates)
-                {
-                    if (wp.Name == name)
-                        return wp;
-                }
+                int result = await Query("UPDATE Warpplates SET Protected=@0 WHERE WarpplateName=@1 AND WorldID=@2", state ? 1 : 0, warpplate.Name, Main.worldID.ToString());
+                return result > 0;
             }
             catch (Exception ex)
             {
 				TShock.Log.Error(ex.ToString());
             }
-            //return new Warpplate();  // <-- that's dumb
-            return null; 
-        }
 
-        public bool InArea(int x, int y)
-        {
-            foreach (Warpplate Warpplate in Warpplates)
-            {
-                if (x >= Warpplate.Area.Left && x <= Warpplate.Area.Right &&
-                    y >= Warpplate.Area.Top && y <= Warpplate.Area.Bottom &&
-                    Warpplate.DisableBuild)
-                {
-                    return true;
-                }
-            }
             return false;
         }
 
-        public string InAreaWarpplateName(int x, int y)
+        public async Task<bool> UpdateWarpplate(Warpplate warpplate)
         {
-            foreach (Warpplate Warpplate in Warpplates)
-            {
-                if (x >= Warpplate.Area.Left && x <= Warpplate.Area.Right &&
-                    y >= Warpplate.Area.Top && y <= Warpplate.Area.Bottom &&
-                    Warpplate.DisableBuild)
-                {
-                    return Warpplate.Name;
-                }
-            }
-            return null;
-        }
-
-        public static List<string> ListIDs(string MergedIDs)
-        {
-            return MergedIDs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-        }
-
-        public bool removedestination(string WarpplateName)
-        {
-            Warpplate r = GetWarpplateByName(WarpplateName);
-            if (r != null)
-            {
-                int q = database.Query("UPDATE Warpplates SET WarpplateDestination=@0 WHERE WarpplateName=@1 AND WorldID=@2", "", WarpplateName, Main.worldID.ToString());
-                r.WarpDest = "";
-                if (q > 0)
-                    return true;
-            }
-            return false;
-        }
-
-        public bool adddestination(string WarpplateName, string WarpDestination, int Type = 0)
-        {
-            Warpplate r = GetWarpplateByName(WarpplateName);
-            if (r != null)
-            {
-                int q = database.Query("UPDATE Warpplates SET WarpplateDestination=@0, Type=@3 WHERE WarpplateName=@1 AND WorldID=@2;", WarpDestination, WarpplateName, Main.worldID.ToString(), Type);
-                r.WarpDest = WarpDestination;
-                if (q > 0)
-                    return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Gets all the Warpplates names from world
-        /// </summary>
-        /// <param name="worldid">World name to get Warpplates from</param>
-        /// <returns>List of Warpplates with only their names</returns>
-        public List<Warpplate> ListAllWarpplates(string worldid)
-        {
-            var WarpplatesTemp = new List<Warpplate>();
             try
             {
-                foreach (Warpplate wp in Warpplates)
-                {
-                    WarpplatesTemp.Add(new Warpplate { Name = wp.Name });
-                }
+                int result = await Query("UPDATE Warpplates SET width=@0, height=@1, Delay=@2, Label=@3 WHERE WarpplateName=@4 AND WorldID=@5",
+                    warpplate.Area.Width, warpplate.Area.Height, warpplate.Delay, warpplate.Label, warpplate.Name, Main.worldID.ToString());
+
+                return result > 0;
             }
             catch (Exception ex)
             {
 				TShock.Log.Error(ex.ToString());
             }
-            return WarpplatesTemp;
-        }
 
-        public Warpplate GetWarpplateByName(String name)
-        {
-            return Warpplates.FirstOrDefault(r => r.Name.Equals(name) && r.WorldID == Main.worldID.ToString());
-        }
-
-        public string GetLabel(String name)
-        {
-            Warpplate wp = FindWarpplate(name);
-            if (String.IsNullOrEmpty(wp.Label))
-                return name;
-            else
-                return wp.Label;
-        }
-    }
-
-    public class Warpplate
-    {
-        public Rectangle Area { get; set; }
-        public Vector2 WarpplatePos { get; set; }
-        public string Name { get; set; }
-        public string WarpDest { get; set; }
-        public bool DisableBuild { get; set; }
-        public string WorldID { get; set; }
-        public List<int> AllowedIDs { get; set; }
-        public int Delay { get; set; }
-        public string Label { get; set; }
-        public int Type { get; set; }
-
-        public Warpplate(Vector2 warpplatepos, Rectangle Warpplate, string name, string warpdest, bool disablebuild, string WarpplateWorldIDz, string label, int type)
-            : this()
-        {
-            WarpplatePos = warpplatepos;
-            Area = Warpplate;
-            Name = name;
-            Label = label;
-            WarpDest = warpdest;
-            DisableBuild = disablebuild;
-            WorldID = WarpplateWorldIDz;
-            Delay = 4;
-            Type = type;
-        }
-
-        public Warpplate()
-        {
-            WarpplatePos = Vector2.Zero;
-            Area = Rectangle.Empty;
-            Name = string.Empty;
-            WarpDest = string.Empty;
-            DisableBuild = true;
-            WorldID = string.Empty;
-            AllowedIDs = new List<int>();
-            Type = 0;
-        }
-
-        public bool InArea(Rectangle point)
-        {
-            if (Area.Contains(point.X, point.Y))
-            {
-                return true;
-            }
             return false;
+        }
+
+        public async Task<bool> RemoveDestination(Warpplate warpplate)
+        {
+            int result = await Query("UPDATE Warpplates SET WarpplateDestination=@0 WHERE WarpplateName=@1 AND WorldID=@2", "", warpplate.Name, Main.worldID.ToString());
+
+            return result > 0;
+        }
+
+        public async Task<bool> SetDestination(Warpplate warpplate, string warpplateDestination, int type = 0)
+        {
+            int result = await Query("UPDATE Warpplates SET WarpplateDestination=@0, Type=@3 WHERE WarpplateName=@1 AND WorldID=@2;", warpplateDestination, warpplate.Name, Main.worldID.ToString(), type);
+            warpplate.Destination = warpplateDestination;
+
+            return result > 0;
         }
     }
 }
