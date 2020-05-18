@@ -7,7 +7,7 @@ using TShockAPI;
 
 namespace AdvancedWarpplates
 {
-    [ApiVersion(2, 0)]
+    [ApiVersion(2, 1)]
     public class WarpplatePlugin : TerrariaPlugin
     {
         public Player[] Players = new Player[256];
@@ -133,24 +133,28 @@ namespace AdvancedWarpplates
         /// <param name="args">The elapsed event args</param>
         private void OnQuickUpdate(object sender, ElapsedEventArgs args)
         {
-            try {
-                lock (Players)
-                    for (int i = 0; i < Players.Length; i++)
+            lock (Players)
+            {
+                for (int i = 0; i < Players.Length; i++)
+                {
+                    Player player = Players[i];
+                    if (player == null || player.TSPlayer == null)
                     {
-                        Player player = Players[i];
-                        if (player == null || player.TSPlayer == null)
-                        {
-                            continue;
-                        }
+                        continue;
+                    }
 
+                    try
+                    {
                         if (player.TSPlayer.Group.HasPermission("warpplate.use") && player.CanUseWarpplates)
                         {
-                            
+                            player.Update();
                         }
                     }
-            } catch (Exception ex)
-            {
-                TShock.Log.Error(ex.ToString());
+                    catch (Exception ex)
+                    {
+                        TShock.Log.Error(ex.ToString());
+                    }
+                }
             }
         }
     }

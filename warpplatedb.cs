@@ -160,7 +160,7 @@ namespace AdvancedWarpplates
         {
             try
             {
-                int result = await Query("INSERT INTO Warpplates (X1, Y1, width, height, WarpplateName, WorldID, UserIds, Protected, WarpplateDestination, Delay, Label) VALUES (@0, @1, @2, @3, @4, @5, @6, @7, @8, @9, @10);",
+                int result = await Query("INSERT INTO Warpplates (X1, Y1, width, height, WarpplateName, WorldID, UserIds, Protected, WarpplateDestination, Delay, Label, Type) VALUES (@0, @1, @2, @3, @4, @5, @6, @7, @8, @9, @10, 0);",
                     tx, ty, width, height, Warpplatename, worldid, "", 1, Warpdest, 4, "");
 
                 return result > 0;

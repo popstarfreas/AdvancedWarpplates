@@ -75,6 +75,26 @@ namespace AdvancedWarpplates
         /// <param name="destinationWarpplate">The destination warpplate they are attempting to go to</param>
         private void CheckAndUseDestinationWarpplate(Warpplate warpplate, Warpplate destinationWarpplate)
         {
+            if (TSPlayer == null) {
+                TShock.Log.ConsoleError("AdvancedWarpplates: Player is null");
+                return;
+            }
+
+            if (warpplate == null)
+            {
+                TShock.Log.ConsoleError("AdvancedWarpplates: Warpplate is null");
+            }
+
+            if (destinationWarpplate == null)
+            {
+                TShock.Log.ConsoleError("AdvancedWarpplates: Destination is null");
+            }
+
+            if (destinationWarpplate.WarpplatePos == null)
+            {
+                TShock.Log.ConsoleError("AdvancedWarpplates: Destination Location is null");
+            }
+
             TimeStandingOnWarpplate++;
             if ((warpplate.Delay - TimeStandingOnWarpplate) > 0)
                 TSPlayer.SendInfoMessage("You will be warped to " + destinationWarpplate.Label + " in " + (warpplate.Delay - TimeStandingOnWarpplate) + " seconds");
