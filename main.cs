@@ -92,6 +92,7 @@ namespace AdvancedWarpplates
             TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.SetWarpplateDestination, "swpd"));
             TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.RemoveWarpplateDestination, "rwpd"));
             TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.WarpplateInformation, "wpi"));
+            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.ListWarpplates, "lwp"));
             TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.use", Commands.WarpplateAllow, "wpa"));
             TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.ReloadWarpplates, "rwp"));
             TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.SetWarpplateDelay, "swpdl"));

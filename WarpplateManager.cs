@@ -74,9 +74,9 @@ namespace AdvancedWarpplates
         /// </summary>
         /// <param name="worldid">World name to get Warpplates from</param>
         /// <returns>List of Warpplates with only their names</returns>
-        public List<Warpplate> ListAllWarpplates(string worldid)
+        public List<String> ListAllWarpplates()
         {
-            var WarpplatesTemp = new List<Warpplate>();
+            /*var WarpplatesTemp = new List<Warpplate>();
             try
             {
                 foreach (Warpplate wp in Warpplates)
@@ -89,6 +89,21 @@ namespace AdvancedWarpplates
                 TShock.Log.Error(ex.ToString());
             }
             return WarpplatesTemp;
+            */
+
+            var warpplateNames = new List<String>();
+            try
+            {
+                foreach(Warpplate wp in Warpplates)
+                {
+                    warpplateNames.Add(wp.Name);
+                }
+            }
+            catch (Exception ex)
+            {
+                TShock.Log.Error(ex.ToString());
+            }
+            return warpplateNames;
         }
 
         /// <summary>

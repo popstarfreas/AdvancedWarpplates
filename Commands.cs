@@ -405,6 +405,23 @@ namespace AdvancedWarpplates
             }
         }
 
+        public void ListWarpplates(CommandArgs args)
+        {
+            int pageNumber;
+            if (!PaginationTools.TryParsePageNumber(args.Parameters, 0, args.Player, out pageNumber))
+                return;
+
+            var wpNames = Manager.ListAllWarpplates();
+
+            PaginationTools.SendPage(args.Player, pageNumber, PaginationTools.BuildLinesFromTerms(wpNames),
+                new PaginationTools.Settings
+                {
+                    HeaderFormat = "Warpplates ({0}/{1}):",
+                    FooterFormat = "Type {0}lwp {{0}} for more.".SFormat(TShock.Config.CommandSpecifier),
+                    NothingToDisplayString = "There are currently no warpplates defined."
+                });
+        }
+
         public async void ReloadWarpplates(CommandArgs args)
         {
             await Manager.ReloadAllWarpplates();
