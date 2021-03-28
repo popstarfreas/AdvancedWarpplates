@@ -92,6 +92,10 @@ namespace AdvancedWarpplates
             {
                 HelpText = "Manage warpplates."
             });
+            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.use", Commands.WarpplateAllow, "wpa")
+            {
+                HelpText = "Enable/Disable activating warpplates for yourself."
+            });
         }
         
         /// <summary>
