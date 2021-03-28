@@ -91,6 +91,11 @@ namespace AdvancedWarpplates
 
                 case "dim":
                 case "dimension":
+                    if (!args.Player.HasPermission("warpplate.setdimensional"))
+                    {
+                        args.Player.SendErrorMessage("You do not have permission to set dimensions.");
+                        break;
+                    }
                     SetWarpplateDimension(args);
                     break;
 
@@ -117,7 +122,7 @@ namespace AdvancedWarpplates
                             "width [<name>] <width in blocks> - Set width for warpplate.",
                             "height [<name>] <height in blocks> - Set height for warpplate.",
                             "resize [<name>] <width> <height> - Resize dimensions for warpplate.",
-                            "label [<name>] <label name> - Set the label name for the warpplate"
+                            "label [<name>] <label name> - Set the label name for the warpplate destination."
                         };
                         if (args.Player.HasPermission("warpplate.setdimensional"))
                         {
