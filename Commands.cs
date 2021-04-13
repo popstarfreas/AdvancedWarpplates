@@ -134,7 +134,7 @@ namespace AdvancedWarpplates
                             new PaginationTools.Settings
                             {
                                 HeaderFormat = "Warpplate Sub-Commands ({0}/{1}):",
-                                FooterFormat = "Type {0}wp {{0}} for more sub-commands.".SFormat(TShock.Config.CommandSpecifier)
+                                FooterFormat = "Type {0}wp {{0}} for more sub-commands.".SFormat(TShock.Config.Settings.CommandSpecifier)
                             }
                         );
                         break;
@@ -540,7 +540,7 @@ namespace AdvancedWarpplates
                 new PaginationTools.Settings
                 {
                     HeaderFormat = "Warpplates ({0}/{1}):",
-                    FooterFormat = "Type {0}lwp {{0}} for more.".SFormat(TShock.Config.CommandSpecifier),
+                    FooterFormat = "Type {0}lwp {{0}} for more.".SFormat(TShock.Config.Settings.CommandSpecifier),
                     NothingToDisplayString = "There are currently no warpplates defined."
                 });
         }
