@@ -2,6 +2,8 @@
 using Microsoft.Xna.Framework;
 using TShockAPI;
 using Terraria;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AdvancedWarpplates
 {
@@ -19,6 +21,127 @@ namespace AdvancedWarpplates
             Players = players;
         }
 
+        public void MainCommand(CommandArgs args)
+        {
+            string cmd = "help";
+            if (args.Parameters.Count > 0)
+            {
+                cmd = args.Parameters[0].ToLower();
+            }
+            switch (cmd)
+            {
+                case "set":
+                    SetWarpplate(args);
+                    break;
+
+                case "del":
+                case "delete":
+                case "remove":
+                    DeleteWarpplate(args);
+                    break;
+
+                case "setdest":
+                case "setdestination":
+                    SetWarpplateDestination(args);
+                    break;
+
+                case "deldest":
+                case "deletedestination":
+                    RemoveWarpplateDestination(args);
+                    break;
+
+                case "info":
+                    WarpplateInformation(args);
+                    break;
+
+                case "list":
+                    ListWarpplates(args);
+                    break;
+
+                case "allow":
+                case "toggle":
+                    WarpplateAllow(args);
+                    break;
+
+                case "reload":
+                    ReloadWarpplates(args);
+                    break;
+
+                case "delay":
+                    SetWarpplateDelay(args);
+                    break;
+
+                case "width":
+                    SetWarpplateWidth(args);
+                    break;
+
+                case "height":
+                    SetWarpplateHeight(args);
+                    break;
+
+                case "resize":
+                case "size":
+                    SetWarpplateSize(args);
+                    break;
+
+                case "label":
+                case "display":
+                    SetWarpplateLabel(args);
+                    break;
+
+                case "dim":
+                case "dimension":
+                    if (!args.Player.HasPermission("warpplate.setdimensional"))
+                    {
+                        args.Player.SendErrorMessage("You do not have permission to set a dimensional warpplate.");
+                        break;
+                    }
+                    SetWarpplateDimension(args);
+                    break;
+
+                case "help":
+                default:
+                    {
+                        int pageNumber = 1;
+                        int pageParamIndex = 0;
+                        if (args.Parameters.Count > 1)
+                            pageParamIndex = 1;
+                        if (!PaginationTools.TryParsePageNumber(args.Parameters, pageParamIndex, args.Player, out pageNumber))
+                            return;
+
+                        List<String> lines = new List<String>{
+                            "set <name> - Set new warpplate at your position.",
+                            "delete <name> - Deletes the given warpplate.",
+                            "setdest <name> <destination> - Set destination for the given warpplate.",
+                            "deldest <name> - Delete the destination for the given warpplate.",
+                            "info <name> - Display info for the given warpplate.",
+                            "list - List all warpplates in the world.",
+                            "toggle - Enable/Disable activating warpplates for yourself.",
+                            "reload - Reload warpplate information from database.",
+                            "delay [<name>] <delay in seconds> - Set delay for warpplate.",
+                            "width [<name>] <width in blocks> - Set width for warpplate.",
+                            "height [<name>] <height in blocks> - Set height for warpplate.",
+                            "resize [<name>] <width> <height> - Resize dimensions for warpplate.",
+                            "label [<name>] <label name> - Set the label name for the warpplate destination."
+                        };
+                        if (args.Player.HasPermission("warpplate.setdimensional"))
+                        {
+                            lines.Add("dim [<name>] <dimension name> - Set dimension destination for the warpplate.");
+                        }
+
+                        PaginationTools.SendPage(
+                            args.Player, pageNumber, lines,
+                            new PaginationTools.Settings
+                            {
+                                HeaderFormat = "Warpplate Sub-Commands ({0}/{1}):",
+                                FooterFormat = "Type {0}wp {{0}} for more sub-commands.".SFormat(TShock.Config.CommandSpecifier)
+                            }
+                        );
+                        break;
+                    }
+            }
+        }
+
         /// <summary>
         /// Updates or gives a warpplate a delay
         /// </summary>
@@ -27,13 +150,13 @@ namespace AdvancedWarpplates
         {
             // Use the given warpplate name or find the warpplate they are standing in
             string region = "";
-            if (args.Parameters.Count == 2)
-                region = args.Parameters[0];
-            else if (args.Parameters.Count == 1)
+            if (args.Parameters.Count == 3)
+                region = args.Parameters[1];
+            else if (args.Parameters.Count == 2)
                 region = Manager.InAreaWarpplateName(args.Player.TileX, args.Player.TileY);
             else
             {
-                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /swpdl [<warpplate name>] <delay in seconds>");
+                args.Player.SendErrorMessage("Invalid syntax! Proper synatx: /wp delay [<warpplate name>] <delay in seconds>");
                 args.Player.SendErrorMessage("Set 0 for immediate warp");
                 return;
             }
@@ -67,13 +190,13 @@ namespace AdvancedWarpplates
         public async void SetWarpplateWidth(CommandArgs args)
         {
             string region = "";
-            if (args.Parameters.Count == 2)
-                region = args.Parameters[0];
-            else if (args.Parameters.Count == 1)
+            if (args.Parameters.Count == 3)
+                region = args.Parameters[1];
+            else if (args.Parameters.Count == 2)
                 region = Manager.InAreaWarpplateName(args.Player.TileX, args.Player.TileY);
             else
             {
-                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /swpw [<warpplate name>] <width in blocks>");
+                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /wp width [<warpplate name>] <width in blocks>");
                 return;
             }
 
@@ -107,14 +230,14 @@ namespace AdvancedWarpplates
         public async void SetWarpplateLabel(CommandArgs args)
         {
             string region = "";
-            if (args.Parameters.Count == 2)
-                region = args.Parameters[0];
-            else if (args.Parameters.Count == 1)
+            if (args.Parameters.Count == 3)
+                region = args.Parameters[1];
+            else if (args.Parameters.Count == 2)
                 region = Manager.InAreaWarpplateName(args.Player.TileX, args.Player.TileY);
             else
             {
-                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /swpl [<warpplate name>] <label>");
-                args.Player.SendErrorMessage("Type /swpl [<warpplate name>] \"\" to set label to default (warpplate name)");
+                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /wp label [<warpplate name>] <label>");
+                args.Player.SendErrorMessage("Type /wp label [<warpplate name>] \"\" to set label to default (warpplate name)");
                 return;
             }
             Warpplate warpplate = Manager.GetWarpplateByName(region);
@@ -138,14 +261,14 @@ namespace AdvancedWarpplates
         public async void SetWarpplateDimension(CommandArgs args)
         {
             string region = "";
-            if (args.Parameters.Count == 2)
-                region = args.Parameters[0];
-            else if (args.Parameters.Count == 1)
+            if (args.Parameters.Count == 3)
+                region = args.Parameters[1];
+            else if (args.Parameters.Count == 2)
                 region = Manager.InAreaWarpplateName(args.Player.TileX, args.Player.TileY);
             else
             {
-                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /swpdim [<warpplate name>] <dimension name>");
-                args.Player.SendErrorMessage("Type /swpdim [<warpplate name>] \"\" to set dimension to none");
+                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /wp dim [<warpplate name>] <dimension name>");
+                args.Player.SendErrorMessage("Type /wp dim [<warpplate name>] \"\" to set dimension to none");
                 return;
             }
 
@@ -195,13 +318,13 @@ namespace AdvancedWarpplates
         public async void SetWarpplateHeight(CommandArgs args)
         {
             string region = "";
-            if (args.Parameters.Count == 2)
-                region = args.Parameters[0];
-            else if (args.Parameters.Count == 1)
+            if (args.Parameters.Count == 3)
+                region = args.Parameters[1];
+            else if (args.Parameters.Count == 2)
                 region = Manager.InAreaWarpplateName(args.Player.TileX, args.Player.TileY);
             else
             {
-                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /swph [<warpplate name>] <height in blocks>");
+                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /wp height [<warpplate name>] <height in blocks>");
                 return;
             }
 
@@ -244,13 +367,13 @@ namespace AdvancedWarpplates
         public async void SetWarpplateSize(CommandArgs args)
         {
             string region = "";
-            if (args.Parameters.Count == 3)
-                region = args.Parameters[0];
-            else if (args.Parameters.Count == 2)
+            if (args.Parameters.Count == 4)
+                region = args.Parameters[1];
+            else if (args.Parameters.Count == 3)
                 region = Manager.InAreaWarpplateName(args.Player.TileX, args.Player.TileY);
             else
             {
-                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /swps [<warpplate name>] <width> <height>");
+                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /wp resize [<warpplate name>] <width> <height>");
                 return;
             }
 
@@ -292,9 +415,9 @@ namespace AdvancedWarpplates
         /// <param name="args">The command arguments</param>
         public async void SetWarpplate(CommandArgs args)
         {
-            if (args.Parameters.Count < 1)
+            if (args.Parameters.Count < 2)
             {
-                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /swp <warpplate name>");
+                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /wp set <warpplate name>");
                 return;
             }
 
@@ -304,7 +427,7 @@ namespace AdvancedWarpplates
                 return;
             }
 
-            string regionName = String.Join(" ", args.Parameters);
+            string regionName = String.Join(" ", args.Parameters.Skip(1));
             var x = ((((int)args.Player.X) / 16) - 1);
             var y = (((int)args.Player.Y) / 16);
             var width = 2;
@@ -326,13 +449,13 @@ namespace AdvancedWarpplates
         /// <param name="args">The command arguments</param>
         public async void DeleteWarpplate(CommandArgs args)
         {
-            if (args.Parameters.Count < 1)
+            if (args.Parameters.Count < 2)
             {
-                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /dwp <warpplate name>");
+                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /wp delete <warpplate name>");
                 return;
             }
 
-            string regionName = String.Join(" ", args.Parameters);
+            string regionName = String.Join(" ", args.Parameters.Skip(1));
             if (await Manager.DeleteWarpplate(regionName))
             {
                 args.Player.SendInfoMessage("Deleted Warpplate: " + regionName);
@@ -347,14 +470,14 @@ namespace AdvancedWarpplates
         /// <param name="args">The command arguments</param>
         public async void SetWarpplateDestination(CommandArgs args)
         {
-            if (args.Parameters.Count < 2)
+            if (args.Parameters.Count < 3)
             {
-                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /swpd <Warpplate Name> <Name Of Destination Warpplate>");
+                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /wp setdest <Warpplate Name> <Name of Destination Warpplate>");
                 return;
             }
-            if (await Manager.SetDestination(args.Parameters[0], args.Parameters[1]))
+            if (await Manager.SetDestination(args.Parameters[1], args.Parameters[2]))
             {
-                args.Player.SendInfoMessage("Destination " + args.Parameters[1] + " added to Warpplate " + args.Parameters[0]);
+                args.Player.SendInfoMessage("Destination " + args.Parameters[2] + " added to Warpplate " + args.Parameters[1]);
             }
             else
                 args.Player.SendErrorMessage("Could not find specified Warpplate or destination");
@@ -366,14 +489,14 @@ namespace AdvancedWarpplates
         /// <param name="args">The command arguments</param>
         public async void RemoveWarpplateDestination(CommandArgs args)
         {
-            if (args.Parameters.Count < 1)
+            if (args.Parameters.Count < 2)
             {
-                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /rwpd <Warpplate Name>");
+                args.Player.SendErrorMessage("Invalid syntax! Proper syntax: /wp delete <Warpplate Name>");
                 return;
             }
-            if (await Manager.RemoveDestination(args.Parameters[0]))
+            if (await Manager.RemoveDestination(args.Parameters[1]))
             {
-                args.Player.SendInfoMessage("Removed Destination From Warpplate " + args.Parameters[0]);
+                args.Player.SendInfoMessage("Removed Destination From Warpplate " + args.Parameters[1]);
             }
             else
                 args.Player.SendErrorMessage("Could not find specified Warpplate or destination");
@@ -382,9 +505,9 @@ namespace AdvancedWarpplates
         public void WarpplateInformation(CommandArgs args)
         {
             string warpplateName = "";
-            if (args.Parameters.Count > 0)
+            if (args.Parameters.Count > 1)
             {
-                warpplateName = string.Join(" ", args.Parameters);
+                warpplateName = string.Join(" ", args.Parameters.Skip(1));
             }
             else
             {
@@ -399,15 +522,33 @@ namespace AdvancedWarpplates
             else
             {
                 args.Player.SendMessage("Name: " + warpplate.Name + "; Label: " + warpplate.GetLabelOrDefault()
-                    + "Destination: " + warpplate.GetDestinationOrDefault() + ";", Color.HotPink);
+                    + "; Destination: " + warpplate.GetDestinationOrDefault() + ";", Color.HotPink);
                 args.Player.SendMessage("X: " + warpplate.WarpplatePos.X + "; Y: " + warpplate.WarpplatePos.Y +
                     "; W: " + warpplate.Area.Width + "; H: " + warpplate.Area.Height + "; Delay: " + (warpplate.Delay - 1), Color.HotPink);
             }
         }
 
+        public void ListWarpplates(CommandArgs args)
+        {
+            int pageNumber;
+            if (!PaginationTools.TryParsePageNumber(args.Parameters, 1, args.Player, out pageNumber))
+                return;
+
+            var wpNames = Manager.ListAllWarpplates();
+
+            PaginationTools.SendPage(args.Player, pageNumber, PaginationTools.BuildLinesFromTerms(wpNames),
+                new PaginationTools.Settings
+                {
+                    HeaderFormat = "Warpplates ({0}/{1}):",
+                    FooterFormat = "Type {0}lwp {{0}} for more.".SFormat(TShock.Config.CommandSpecifier),
+                    NothingToDisplayString = "There are currently no warpplates defined."
+                });
+        }
+
         public async void ReloadWarpplates(CommandArgs args)
         {
             await Manager.ReloadAllWarpplates();
+            args.Player.SendSuccessMessage("Warpplates reloaded!");
         }
 
         public void WarpplateAllow(CommandArgs args)

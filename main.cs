@@ -87,19 +87,15 @@ namespace AdvancedWarpplates
         public void OnInitialize(EventArgs args)
         {
             Commands = new Commands(Manager, Players);
-            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.SetWarpplate, "swp"));
-            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.DeleteWarpplate, "dwp"));
-            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.SetWarpplateDestination, "swpd"));
-            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.RemoveWarpplateDestination, "rwpd"));
-            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.WarpplateInformation, "wpi"));
-            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.use", Commands.WarpplateAllow, "wpa"));
-            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.ReloadWarpplates, "rwp"));
-            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.SetWarpplateDelay, "swpdl"));
-            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.SetWarpplateWidth, "swpw"));
-            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.SetWarpplateHeight, "swph"));
-            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.SetWarpplateSize, "swps"));
-            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.SetWarpplateLabel, "swpl"));
-            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.setdimensional", Commands.SetWarpplateDimension, "swpdim"));
+
+            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.set", Commands.MainCommand, "warpplate", "wp")
+            {
+                HelpText = "Manage warpplates."
+            });
+            TShockAPI.Commands.ChatCommands.Add(new Command("warpplate.use", Commands.WarpplateAllow, "wpa")
+            {
+                HelpText = "Enable/Disable activating warpplates for yourself."
+            });
         }
         
         /// <summary>
