@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{85F20ADC-C2D1-416D-B7FF-9433C75A8F01}</ProjectGuid>
+    <ProjectGuid>{A1C592EC-4849-489E-B665-62C265DD209A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AdvancedWarpplate</RootNamespace>
