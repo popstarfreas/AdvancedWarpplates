@@ -60,6 +60,11 @@ namespace AdvancedWarpplates
             {
                 case 0:
                     var destinationWarpplate = Manager.GetWarpplateByName(warpplate.Destination);
+                    if (destinationWarpplate == null) {
+                        TShock.Log.Error($"{warpplate.Name}'s destination warpplate \"{warpplate.Destination}\" not found");
+                        break;
+                    }
+
                     CheckAndUseDestinationWarpplate(warpplate, destinationWarpplate);
                     break;
                 case 1:
@@ -77,6 +82,16 @@ namespace AdvancedWarpplates
         {
             if (TSPlayer == null) {
                 TShock.Log.ConsoleError("AdvancedWarpplates: Player is null");
+                return;
+            }
+
+            if (warpplate == null) {
+                TShock.Log.ConsoleError($"AdvancedWarpplates: {nameof(warpplate)} is null");
+                return;
+            }
+
+            if (destinationWarpplate == null) {
+                TShock.Log.ConsoleError($"AdvancedWarpplates: {nameof(destinationWarpplate)} is null");
                 return;
             }
 
