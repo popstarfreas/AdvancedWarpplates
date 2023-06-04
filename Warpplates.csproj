@@ -1,15 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- Build Configuration -->
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
-  <!-- Compiler/IDE Configuration -->
+
+
+  <!-- Compiler Configuration -->
   <PropertyGroup>
     <RootNamespace>AdvancedWarpplate</RootNamespace>
   </PropertyGroup>
+
+
 
   <!-- Package Information -->
   <PropertyGroup>
@@ -21,7 +24,9 @@
     <Version>1.2.4.0</Version>
   </PropertyGroup>
 
-  <!-- NuGet References -->
+
+
+  <!-- References -->
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.11" />
     <PackageReference Include="MODEFDP.OTAPI.Upcoming" Version="3.1.20.1" />
